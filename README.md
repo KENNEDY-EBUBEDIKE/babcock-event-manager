@@ -1,3 +1,4 @@
-# EDUCARE TIME TABLING SERVER
+# Bacbcock University Undergraduate School Project
 
-The server side of an TIME TABLE GENERATING software for EDUCARE TECHNOLOGY SOLUTIONS LTD
+
+A school project for babcock University. The Project is an app that manages schoool even schedules.

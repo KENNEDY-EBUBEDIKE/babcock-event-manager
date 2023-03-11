@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .gradient-custom-2 {
+        /* fallback for old browsers */
+        background: #e9ac58;
+
+        /* Chrome 10-25, Safari 5.1-6 */
+        background: -webkit-linear-gradient(to right, #e9ac58, #050462);
+
+        /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        background: linear-gradient(to right, #e9ac58, #050462);
+        }
+
+        @media (min-width: 768px) {
+        .gradient-form {
+        height: 100vh !important;
+        }
+        }
+        @media (min-width: 769px) {
+        .gradient-custom-2 {
+        border-top-right-radius: .3rem;
+        border-bottom-right-radius: .3rem;
+        }
+        }
+    </style>
+          <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.css" rel="stylesheet"/>
+</head>
+<body>
+    <section class="h-100 gradient-form" style="background-color: #eee;">
+      <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+          <div class="col-xl-10">
+            <div class="card rounded-3 text-black">
+              <div class="row g-0">
+                <div class="col-lg-6">
+                  <div class="card-body p-md-5 mx-md-4">
+
+                    <div class="text-center">
+                      <a href="#">
+                        <img src=" {% static 'images/babcock-logo.jpeg' %}" alt="logo" style="width: 225px;">
+                      </a>
+                      <div class="mt-4 mb-5 pb-1"></div>
+                    </div>
+
+                      <form id="loginForm"> {% csrf_token %}
+                      <p>Please login to your account</p>
+
+                      <div class="form-outline mb-4">
+                        <input type="email" id="username" class="form-control"
+                          placeholder="Phone number or email address" />
+                        <label class="form-label" for="username">Username</label>
+                      </div>
+
+                      <div class="form-outline mb-4">
+                        <input type="password" id="password" class="form-control" />
+                        <label class="form-label" for="password">Password</label>
+                      </div>
+
+                      <div class="form-check form-switch">
+                        <input   class="form-check-input" type="checkbox" role="switch" id="isStaff"/>
+                        <label class="form-check-label" for="isStaff">Switch On to Log in as staff</label>
+                      </div>
+
+                      <div class="text-center pt-1 mb-5 pb-1">
+                        <button onclick="verifyUser()" class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3" type="button">Log in</button>
+                        <a class="text-muted" href="#">Forgot password?</a>
+                      </div>
+
+                      <div class="d-flex align-items-center justify-content-center pb-4">
+                        <p class="mb-0 me-2">Don't have an account?</p>
+                        <button type="button" style="border-color: #050462" class="btn btn-outline" onclick="toggleSignup()">Create new</button>
+                      </div>
+
+                    </form>
+
+                    <form style="display: none" id="signupForm"> {% csrf_token %}
+                      <p>Sign Up for the Portal</p>
+
+                      <div class="form-outline mb-4">
+                        <input name="id" type="text" id="id" class="form-control" placeholder="Matric Number or Staff Id" />
+                        <label class="form-label" for="id">Matric Number or Staff Id</label>
+                      </div>
+
+                        <div class="form-outline mb-4">
+                        <input name="id" type="email" id="email" class="form-control" placeholder="Email" />
+                        <label class="form-label" for="email">Email</label>
+                      </div>
+
+                        <div class="form-outline mb-4">
+                        <input name="first_name" type="text" id="first_name" class="form-control" placeholder="First Name" />
+                        <label class="form-label" for="first_name">First Name</label>
+                      </div>
+
+                        <div class="form-outline mb-4">
+                        <input name="last_name" type="text" id="last_name" class="form-control" placeholder="Last Name" />
+                        <label class="form-label" for="last_name">Last Name</label>
+                      </div>
+
+                      <div class="form-outline mb-4">
+                        <input name="pass" type="password" id="pass" class="form-control" />
+                        <label class="form-label" for="pass">Password</label>
+                      </div>
+
+                      <div class="form-check form-switch">
+                        <input   class="form-check-input" type="checkbox" role="switch" id="staff"/>
+                        <label class="form-check-label" for="staff">Switch On to Sign Up as staff</label>
+                      </div>
+
+                      <div class="text-center pt-1 mb-5 pb-1">
+                        <button onclick="signup()" class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3" type="button">Sign Up</button>
+                      </div>
+
+                      <div class="d-flex align-items-center justify-content-center pb-4">
+                        <p class="mb-0 me-2">Already have an account?</p>
+                        <button type="button" style="border-color: #050462" onclick="toggleLogin()" class="btn btn-outline">Log In</button>
+                      </div>
+
+                    </form>
+
+
+
+                  </div>
+                </div>
+                <div class="col-lg-6 d-flex align-items-center gradient-custom-2">
+                  <div class="text-white px-3 py-4 p-md-5 mx-md-4">
+                    <h4 class="mb-4">We are more than just a School</h4>
+                    <p class="small mb-0">Choose to Login as a student  or staff to gain access to the event management Software.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- MDB -->
+    <script src="{% static 'bower_components/jquery/dist/jquery.js/' %}"></script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"
+    ></script>
+
+    <script>
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    </script>
+
+    <script>
+
+        toggleSignup = ()=>{
+            document.querySelector('#signupForm').style.display = 'block'
+            document.querySelector('#loginForm').style.display = 'none'
+        }
+
+        toggleLogin = ()=>{
+            document.querySelector('#signupForm').style.display = 'none'
+            document.querySelector('#loginForm').style.display = 'block'
+        }
+
+        signup = ()=>{
+            $.ajax({
+                url: "/api/users/signup/",
+                type: 'POST',
+                data: {
+                    'id': $('#id').val(),
+                    'email': $('#email').val(),
+                    'password': $('#pass').val(),
+                    'first_name': $('#first_name').val(),
+                    'last_name': $('#last_name').val(),
+                    'is_staff': $('#staff').is(':checked'),
+                },
+                dataType: "json",
+                headers: {'X-CSRFToken': csrftoken},
+                mode: 'same-origin',
+                success: function (response) {
+                    if (response.success) {
+                        console.log(response.message)
+                    } else {
+                        console.log(response.message)
+                    }
+                },
+            })
+        }
+
+        verifyUser = ()=> {
+            let username = document.querySelector('#username').value;
+            let password = document.querySelector('#password').value;
+            let isStaff = $('#isStaff').is(':checked');
+            $.ajax({
+                url: "/api/users/verify_user/",
+                type: 'POST',
+                data: {
+                    'username': username,
+                    'password': password,
+                    'is_staff': isStaff,
+                },
+                dataType: "json",
+                headers: {'X-CSRFToken': csrftoken},
+                mode: 'same-origin',
+                success: function (response) {
+                    if (response.success) {
+                        console.log(response.message)
+                    } else {
+                        console.log(response.message)
+                    }
+                },
+            })
+        }
+    </script>
+</body>
+</html>
