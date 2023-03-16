@@ -1,13 +1,14 @@
-from .views import signup
 from django.urls import path
 from django.conf import settings
-
+from .views import dashboard, event_calendar
 
 urlpatterns = [
-    path('signup/', signup, name='signup'),
+    path('', dashboard, name='dashboard'),
+    path('schedule-event', event_calendar, name='event_calendar'),
 ]
 
 if settings.DEBUG:
     from django.conf.urls.static import static
+
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

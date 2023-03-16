@@ -1,10 +1,12 @@
-from .views import login
+from .views import login_view
 from django.urls import path
 from django.conf import settings
+from django.contrib.auth import views as auth_view
 
 
 urlpatterns = [
-    path('login/', login, name='login')
+    path('login/', login_view, name='login'),
+    path('logout/', auth_view.LogoutView.as_view(), name='logout'),
 ]
 
 if settings.DEBUG:

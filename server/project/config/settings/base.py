@@ -44,6 +44,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     'apps.users',
+    'apps.scheduler',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -115,13 +116,17 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Lagos'
 
 USE_I18N = True
 
 USE_TZ = True
 
 AUTH_USER_MODEL = 'users.User'
+LOGIN_REDIRECT_URL = '/dashboard'
+LOGIN_URL = '/users/login/'
+LOGOUT_URL = '/users/logout/'
+LOGOUT_REDIRECT_URL = '/users/login/'
 
 
 # Static files (CSS, JavaScript, Images)

@@ -40,6 +40,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    created_at = models.DateField(auto_now_add=True)
 
     objects = UserProfileManager()
 

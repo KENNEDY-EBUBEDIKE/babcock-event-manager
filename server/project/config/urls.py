@@ -22,6 +22,10 @@ urlpatterns = [
 
     path('users/', include('apps.users.ssr.urls')),
     path('api/users/', include('apps.users.api.urls')),
+
+    path('', include('apps.scheduler.ssr.urls')),
+    path('scheduler/', include('apps.scheduler.ssr.urls')),
+    path('api/scheduler/', include('apps.scheduler.api.urls')),
 ]
 
 if settings.DEBUG:
