@@ -1,10 +1,12 @@
 from django.urls import path
 from django.conf import settings
-from .views import dashboard, event_calendar
+from .views import dashboard, event_calendar, meeting_log, add_venue
 
 urlpatterns = [
     path('', dashboard, name='dashboard'),
     path('schedule-event', event_calendar, name='event_calendar'),
+    path('meeting-log', meeting_log, name='meeting_log'),
+    path('add-venue', add_venue, name='add_venue'),
 ]
 
 if settings.DEBUG:

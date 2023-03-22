@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>BABCOCK | LOGIN</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <style>
         .gradient-custom-2 {
         /* fallback for old browsers */
@@ -34,6 +35,8 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
     <!-- MDB -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.css" rel="stylesheet"/>
+    <!-- TOASTR -->
+    <link href="{% static 'dist/css/toastr.css' %}" rel="stylesheet"/>
 </head>
 <body>
     <section class="h-100 gradient-form" style="background-color: #eee;">
@@ -52,7 +55,7 @@
                       <div class="mt-4 mb-5 pb-1"></div>
                     </div>
 
-                      <form method="POST" id="loginForm"> {% csrf_token %}
+                    <form onsubmit="verifyUser(event)" method="POST" id="loginForm" > {% csrf_token %}
                       <p>Please login to your account</p>
 
                       <div class="form-outline mb-4">
@@ -140,6 +143,7 @@
     </section>
     <!-- MDB -->
     <script src="{% static 'bower_components/jquery/dist/jquery.js/' %}"></script>
+    <script src="{% static 'dist/js/toastr.min.js' %}"></script>
     <script
       type="text/javascript"
       src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"
@@ -178,13 +182,62 @@
                 mode: 'same-origin',
                 success: function (response) {
                     if (response.success) {
-                        window.open("/users/login","_self")
+                        toastr["success"]("Event Scheduled successfully","SUCCESS!").then(()=>{
+                          toggleLogin()
+                        })
                     } else {
-                        console.log(response.message)
+                      toastr["error"](response.message,"ERROR!")
                     }
                 },
             })
         }
+
+        function verifyUser(event) {
+            event.preventDefault()
+            $.ajax({
+                url: "/api/users/verify-user/",
+                type: 'POST',
+                data: {
+                    'username': $('#username').val(),
+                    'password': $('#password').val(),
+                    // 'is_staff': $('#staff').is(':checked'),
+                },
+                dataType: "json",
+                headers: {'X-CSRFToken': csrftoken},
+                mode: 'same-origin',
+                success: function (response) {
+                    if (response.success) {
+                        setTimeout(toastr["success"](response.message,"SUCCESS!"), parseInt(toastr.options.timeOut));
+                        document.querySelector('#loginForm').submit();
+
+                    } else {
+                      toastr["error"](response.message,"ERROR!")
+                    }
+                },
+            })
+
+        }
+
     </script>
+
+  <script>
+    toastr.options = {
+      "closeButton": true,
+      "debug": false,
+      "newestOnTop": true,
+      "progressBar": true,
+      "positionClass": "toast-top-right",
+      "preventDuplicates": false,
+      "onclick": null,
+      "showDuration": "300",
+      "hideDuration": "1000",
+      "timeOut": "5000",
+      "extendedTimeOut": "1000",
+      "showEasing": "swing",
+      "hideEasing": "linear",
+      "showMethod": "fadeIn",
+      "hideMethod": "fadeOut"
+    }
+  </script>
 </body>
 </html>

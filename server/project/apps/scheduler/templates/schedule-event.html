@@ -71,9 +71,27 @@
                   </ul>
                 </div>
                 <div class="input-group">
+
                   <input id="new-event-title" type="text" class="form-control" placeholder="Event Title">
-                  <input id="new-event-date" type="date" class="form-control" placeholder="Event Time">
-                  <input id="new-event-time" type="time" class="form-control" placeholder="Event Time">
+                  <input id="new-event-description" type="text" class="form-control" placeholder="Event Description">
+                  <input style="margin-top: 10px" id="new-event-date" type="date" class="form-control" placeholder="Event Date">
+                  <input style="margin-top: 10px" id="new-event-time" type="time" class="form-control" placeholder="Event Time">
+
+                  <input style="margin-top: 10px" id="new-event-link" type="text" class="form-control" placeholder="Meeting Link">
+                    <select id="venue_list" class="form-control select2" style="width: 100%;margin-top: 10px">
+                      <option selected="selected">Select Venue</option>
+
+                      {% for venue in venues %}
+                        <option>{{venue}}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="button" id="add-venue" class="btn btn-success" data-toggle="modal" data-target="#add-venue-modal" ><i class="fa fa-plus bg-green"></i></button>
+
+
+                  <div style="margin-top: 10px" class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="venue-switch"/>
+                        <label class="form-check-label" for="venue-switch">choose a physical venue</label>
+                  </div>
 
                   <div class="input-group-btn">
                     <button id="add-new-event" type="button" class="btn btn-primary btn-flat">Add</button>
@@ -105,6 +123,55 @@
         <!-- /.row -->
       </section>
       <!-- /.content -->
+
+
+      <div class="modal fade" id="add-venue-modal">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Add Venue Form</h4>
+              </div>
+              <!-- general form elements -->
+          <div class="box box-primary">
+            <div class="box-header with-border">
+              <h3 class="box-title">Venue Details</h3>
+            </div>
+            <!-- /.box-header -->
+            <!-- form start -->
+            <form role="form" method="POST" action="/scheduler/add-venue"> {% csrf_token %}
+              <div class="box-body">
+                <div class="form-group">
+                  <label for="name">Name</label>
+                  <input required type="text" class="form-control" name="name" id="name" placeholder="Enter Venue Name">
+                </div>
+                <div class="form-group">
+                  <label for="capacity">Capacity</label>
+                  <input required type="number" class="form-control" name="capacity" id="capacity" placeholder="Capacity">
+                </div>
+                <div class="form-group">
+                  <label for="coordinate">Coordinate</label>
+                  <input type="text" class="form-control" name="coordinate" id="coordinate" placeholder="Coordinate">
+                </div>
+              </div>
+                <div class="box-footer">
+                  <button type="submit" class="btn btn-primary pull-right">Submit</button>
+                </div>
+            </form>
+          </div>
+              <!-- /.box -->
+              <!-- /.box-body -->
+              <div class="modal-footer">
+                <button type="button" class="btn btn-danger pull-left" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+            <!-- /.modal-content -->
+          </div>
+          <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
 {% endblock %}
 
 {% block extra_script %}
@@ -112,7 +179,7 @@
   <script>
       const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
   </script>
-  <!-- Page specific script -->
+
   <script>
     let allEvents;
     getEvents = ()=>{
@@ -124,10 +191,8 @@
       });
 
     }
-
     //  Get Events from Backend
     getEvents()
-
     function eventsReady() {
       $(function () {
 
@@ -191,9 +256,25 @@
           copiedEventObject.borderColor     = $(this).css('border-color')
 
           // render the event on the calendar
-          addEvent(copiedEventObject.title, Date.parse(date.toString()), $(this).css('background-color'), $(this).css('border-color'))
+          let venue;
+          let event_type;
+          if ($('#venue-switch').is(':checked')) {
+            venue = $(this).find('span.venue_list').text()
+            event_type = "physical"
+          }else{
+            venue = $(this).find('span.meeting_link').text()
+            event_type = "virtual"
+          }
+          addEvent(
+              copiedEventObject.title,
+              Date.parse(date.toString()),
+              $(this).find('span.description').text(),
+              venue,
+              event_type,
+              $(this).css('background-color'),
+              $(this).css('border-color')
+          )
           .then(event => {
-              console.log("Event Scheduled successfully");
               copiedEventObject.id = event.id
               originalEventObject.id = event.id
               $('#calendar').fullCalendar('renderEvent', copiedEventObject, true)
@@ -247,8 +328,12 @@
         let event_title = $('#new-event-title').val()
         let event_date = $('#new-event-date').val()
         let event_time = $('#new-event-time').val()
+        let desc = $('#new-event-description')
+        let venue_list = $('#venue_list')
+        let meeting_link = $('#new-event-link')
 
         if (event_title.length === 0 || event_date.length === 0 || event_time.length === 0) {
+          toastr["warning"]("Please check the fields","WARNING!")
           return
         }
 
@@ -259,12 +344,19 @@
           'border-color'    : currColor,
           'color'           : '#fff'
         }).addClass('external-event')
+
         let title = $('<span />').addClass('title').appendTo(event);
         let time = $('<span />').addClass('time').appendTo(event);
         let date = $('<span />').addClass('date').appendTo(event);
+        let dom_desc = $('<span />').addClass('description').appendTo(event);
+        let dom_venue_list = $('<span />').addClass('venue_list').appendTo(event);
+        let dom_meeting_link = $('<span />').addClass('meeting_link').appendTo(event);
 
         title.html(event_title)
         date.html(event_date).prop('hidden', true);
+        dom_desc.html(desc.val()).prop('hidden', true);
+        dom_venue_list.html(venue_list.val()).prop('hidden', true);
+        dom_meeting_link.html(meeting_link.val()).prop('hidden', true);
 
         const [year, month, day] = event_date.split('-');
         const [hours, minutes] = event_time.split(":");
@@ -297,7 +389,24 @@
         if ($('#add_immediately').is(':checked')) {
 
           // Push to backend
-          addEvent(copiedEventObject.title, timeStamp, $(this).css('background-color'), $(this).css('border-color'))
+          let venue;
+          let event_type;
+          if ($('#venue-switch').is(':checked')) {
+            venue = $('#venue_list').val()
+            event_type = "physical"
+          }else{
+            venue = $('#new-event-link').val()
+            event_type = "virtual"
+          }
+          addEvent(
+                  copiedEventObject.title,
+                  timeStamp,
+                  desc.val(),
+                  venue,
+                  event_type,
+                  $(this).css('background-color'),
+                  $(this).css('border-color')
+          )
           .then(event => {
               copiedEventObject.id = event.id
               // Add to the calendar
@@ -317,6 +426,9 @@
         $('#new-event-title').val('')
         $('#new-event-date').val('')
         $('#new-event-time').val('')
+        desc.val("")
+        meeting_link.val("")
+        venue_list.val("")
       })
 
       /* ADDING EVENTS  END*/
@@ -325,13 +437,22 @@
   </script>
 
   <script>
-    addEvent = (title, start, backgroundColor, borderColor) => {
+    addEvent = (title,
+                start,
+                description,
+                venue,
+                event_type,
+                backgroundColor,
+                borderColor) => {
       return new Promise((resolve, reject) => {
           $.ajax({
               url: "/api/scheduler/event/",
               type: 'POST',
               data: {
                   'title': title,
+                  'description': description,
+                  'venue': venue,
+                  'event_type': event_type,
                   'background_color': backgroundColor,
                   'border_color': borderColor,
                   'start': start,
@@ -396,4 +517,27 @@
         })
     }
   </script>
+
+  <script>
+
+    $(document).ready(function() {
+      $("#venue_list").hide();
+      $("#add-venue").hide();
+
+      $("#venue-switch").on("change", function() {
+        if (!$(this).is(":checked")) {
+          $("#new-event-link").show();
+          $("#venue_list").hide();
+          $("#add-venue").hide();
+        } else {
+          $("#new-event-link").hide();
+          $("#venue_list").show();
+          $("#add-venue").show();
+        }
+      });
+    });
+
+  </script>
+
+
 {% endblock %}

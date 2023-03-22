@@ -1,10 +1,11 @@
-from .views import signup
+from .views import signup, verify_user
 from django.urls import path
 from django.conf import settings
 
 
 urlpatterns = [
     path('signup/', signup, name='signup'),
+    path('verify-user/', verify_user, name='verify_user'),
 ]
 
 if settings.DEBUG:
