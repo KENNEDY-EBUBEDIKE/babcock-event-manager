@@ -182,9 +182,9 @@
                 mode: 'same-origin',
                 success: function (response) {
                     if (response.success) {
-                        toastr["success"]("Event Scheduled successfully","SUCCESS!").then(()=>{
+                        toastr["success"]("Signed up successfully","SUCCESS!")
                           toggleLogin()
-                        })
+
                     } else {
                       toastr["error"](response.message,"ERROR!")
                     }
@@ -200,7 +200,6 @@
                 data: {
                     'username': $('#username').val(),
                     'password': $('#password').val(),
-                    // 'is_staff': $('#staff').is(':checked'),
                 },
                 dataType: "json",
                 headers: {'X-CSRFToken': csrftoken},

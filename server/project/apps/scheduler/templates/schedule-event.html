@@ -78,17 +78,21 @@
                   <input style="margin-top: 10px" id="new-event-time" type="time" class="form-control" placeholder="Event Time">
 
                   <input style="margin-top: 10px" id="new-event-link" type="text" class="form-control" placeholder="Meeting Link">
-                    <select id="venue_list" class="form-control select2" style="width: 100%;margin-top: 10px">
-                      <option selected="selected">Select Venue</option>
+                  <select id="venue_list" class="form-control" style="width: 100%;margin-top: 10px">
+                    <option selected="selected">Select Venue</option>
 
-                      {% for venue in venues %}
-                        <option>{{venue}}</option>
-                      {% endfor %}
-                    </select>
+                    {% for venue in venues %}
+                      <option>
+                        <span style="color: red">{{venue.name}}</span>
+<!--                        <span style="color: green">{{venue.capacity}}</span>-->
+                      </option>
+                    {% endfor %}
+                  </select>
+                    {% if request.user.is_staff %}
                     <button type="button" id="add-venue" class="btn btn-success" data-toggle="modal" data-target="#add-venue-modal" ><i class="fa fa-plus bg-green"></i></button>
+                    {% endif  %}
 
-
-                  <div style="margin-top: 10px" class="form-check form-switch">
+                  <div style="margin-top: 20px" class="">
                         <input class="form-check-input" type="checkbox" role="switch" id="venue-switch"/>
                         <label class="form-check-label" for="venue-switch">choose a physical venue</label>
                   </div>
@@ -96,6 +100,12 @@
                   <div class="input-group-btn">
                     <button id="add-new-event" type="button" class="btn btn-primary btn-flat">Add</button>
                   </div>
+                </div>
+                <div class="checkbox">
+                    <label for="create_poll">
+                      <input type="checkbox" id="create_poll">
+                      Create Poll For Event
+                    </label>
                 </div>
                 <div class="checkbox">
                     <label for="add_immediately">
@@ -201,7 +211,6 @@
       function init_events(ele) {
         ele.each(function () {
 
-          // create an Event Object (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
           // it doesn't need to have a start or end
           var eventObject = {
             title: $.trim($(this).find('span.title').text()), // use the element's text as the event title
@@ -258,19 +267,21 @@
           // render the event on the calendar
           let venue;
           let event_type;
-          if ($('#venue-switch').is(':checked')) {
+          if ( $(this).find('span.event_type_switch').text() === "true") {
             venue = $(this).find('span.venue_list').text()
             event_type = "physical"
-          }else{
+          }else if($(this).find('span.event_type_switch').text() === "false"){
             venue = $(this).find('span.meeting_link').text()
             event_type = "virtual"
           }
+
           addEvent(
               copiedEventObject.title,
               Date.parse(date.toString()),
               $(this).find('span.description').text(),
               venue,
               event_type,
+              $(this).find('span.has_poll').text(),
               $(this).css('background-color'),
               $(this).css('border-color')
           )
@@ -295,10 +306,26 @@
         eventResize: function(event, delta, revertFunc) {
           //push to backend
           editEvent(event)
+          .then(message => {
+              toastr["success"](message,"SUCCESS!")
+          })
+          .catch(error => {
+              toastr["error"](error ,"Error!");
+              revertFunc()
+          });
+
         },
         eventDrop: function(event, delta, revertFunc) {
           //push to backend
           editEvent(event)
+          .then(message => {
+              toastr["success"](message,"SUCCESS!")
+          })
+          .catch(error => {
+              toastr["error"](error ,"Error!");
+              revertFunc()
+
+          });
 
         },
         eventClick: function(event, jsEvent, view) {
@@ -351,12 +378,24 @@
         let dom_desc = $('<span />').addClass('description').appendTo(event);
         let dom_venue_list = $('<span />').addClass('venue_list').appendTo(event);
         let dom_meeting_link = $('<span />').addClass('meeting_link').appendTo(event);
+        let dom_event_type = $('<span />').addClass('event_type_switch').appendTo(event);
+        let dom_has_poll = $('<span />').addClass('has_poll').appendTo(event);
 
         title.html(event_title)
         date.html(event_date).prop('hidden', true);
         dom_desc.html(desc.val()).prop('hidden', true);
         dom_venue_list.html(venue_list.val()).prop('hidden', true);
         dom_meeting_link.html(meeting_link.val()).prop('hidden', true);
+        if($('#venue-switch').is(':checked')) {
+            dom_event_type.html("true").prop('hidden', true);
+        }else {
+            dom_event_type.html("false").prop('hidden', true);
+        }
+        if($('#create_poll').is(':checked')) {
+            dom_has_poll.html("true").prop('hidden', true);
+        }else {
+            dom_has_poll.html("false").prop('hidden', true);
+        }
 
         const [year, month, day] = event_date.split('-');
         const [hours, minutes] = event_time.split(":");
@@ -404,6 +443,7 @@
                   desc.val(),
                   venue,
                   event_type,
+                  $('#create_poll').is(':checked'),
                   $(this).css('background-color'),
                   $(this).css('border-color')
           )
@@ -415,7 +455,6 @@
           })
           .catch(error => {
               toastr["error"](error ,"Error!");
-
           });
         }
 
@@ -442,8 +481,10 @@
                 description,
                 venue,
                 event_type,
+                poll,
                 backgroundColor,
                 borderColor) => {
+
       return new Promise((resolve, reject) => {
           $.ajax({
               url: "/api/scheduler/event/",
@@ -456,16 +497,15 @@
                   'background_color': backgroundColor,
                   'border_color': borderColor,
                   'start': start,
+                  'poll': poll,
               },
               dataType: "json",
               headers: {'X-CSRFToken': csrftoken},
               mode: 'same-origin',
               success: function (response) {
                   if (response.success) {
-                      console.log(response.message);
                       resolve(response.event);
                   } else {
-                      console.log(response.message);
                       reject(response.message);
                   }
               },
@@ -475,8 +515,10 @@
           });
       });
     };
+
     editEvent = (event)=>{
-      $.ajax({
+      return new Promise((resolve, reject) => {
+          $.ajax({
             url: "/api/scheduler/event/",
             type: 'PATCH',
             data: {
@@ -490,13 +532,20 @@
             mode: 'same-origin',
             success: function (response) {
                 if (response.success) {
-                    toastr["success"](response.message,"SUCCESS!")
+                    // toastr["success"](response.message,"SUCCESS!")
+                    resolve(response.message);
                 } else {
-                    toastr["error"](response.message,"Error!")
+                    // toastr["error"](response.message,"Error!")
+                    reject(response.message);
                 }
             },
-        })
+            error: function (xhr, status, error) {
+                  reject(error);
+            }
+        });
+      });
     }
+
     deleteEvent = (event)=>{
       $.ajax({
             url: "/api/scheduler/event/",

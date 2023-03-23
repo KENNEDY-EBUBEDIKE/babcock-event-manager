@@ -34,7 +34,7 @@ def signup(request):
         new_user.is_staff = True
         staff = StaffProfile.objects.create(
             user=new_user,
-            matric_number=request.data['id'])
+            staff_id=request.data['id'])
         staff.save()
     else:
         new_user.is_staff = False

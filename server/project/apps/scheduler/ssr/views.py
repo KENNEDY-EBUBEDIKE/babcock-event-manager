@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
-from apps.scheduler.models import Event, Venue
+from apps.scheduler.models import Event, Venue, Poll
+from apps.users.models import User
 
 
 @login_required()
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    users = User.objects.all().count()
+    return render(request, 'dashboard.html', {"users": users})
 
 
 @login_required()
@@ -16,7 +18,14 @@ def event_calendar(request):
 
 @login_required()
 def meeting_log(request):
-    return render(request, 'meeting-log.html')
+    events = Event.objects.all().order_by('actual_start_datetime')
+    return render(request, 'meeting-log.html', {"events": events})
+
+
+@login_required()
+def polls(request):
+    events = request.user.events.all().order_by('actual_start_datetime')
+    return render(request, 'polls.html', {"events": events})
 
 
 @login_required()

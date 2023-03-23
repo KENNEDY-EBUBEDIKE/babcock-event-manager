@@ -1,10 +1,11 @@
 from django.urls import path
 from django.conf import settings
-from .views import event, events
+from .views import event, events, create_poll
 
 urlpatterns = [
     path('event/', event, name='event'),
     path('events/', events, name='events'),
+    path('poll/', create_poll, name='create_poll'),
 ]
 
 if settings.DEBUG:

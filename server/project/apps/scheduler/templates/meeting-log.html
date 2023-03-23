@@ -5,6 +5,7 @@
 
 {% block content %}
 {% load static %}
+{% csrf_token %}
 
 <!-- Content Header (Page header) -->
     <section class="content-header">
@@ -26,14 +27,81 @@
         <div class="col-md-12">
           <!-- The time line -->
           <ul class="timeline">
-            <!-- timeline time label -->
+
+
+            {% for event in events %}
+                <!-- New Date -->
+                <li class="time-label">
+                      <span class="bg-red">
+                        {{event.actual_start_datetime.date}}
+                      </span>
+                </li>
+
+                <!-- timeline item Start-->
+                <li>
+                    {% if event.event_type == "physical"  %}
+                        <i class="fa fa-calendar bg-blue"></i>
+                    {% elif event.event_type == "virtual" %}
+                        <i class="fa fa-comments bg-yellow"></i>
+                    {% endif %}
+
+                  <div class="timeline-item">
+                    <span class="time"><i class="fa fa-clock-o"></i> {{event.actual_start_datetime.time}}</span>
+
+                    {% if event.has_poll  %}
+                      <h1 class="card text-center"><b><strong>POLL</strong></b></h1>
+                    {% endif  %}
+
+                      <h3 class="timeline-header">
+                        <a href="#">{{event.title}}</a>
+                        {% if event.event_type == "physical"  %}
+                            <span class="bg bg-warning" style="padding: 5px">{{event.event_type}} Event</span>
+                        {% elif event.event_type == "virtual" %}
+                            <span class="bg bg-primary" style="padding: 5px">{{event.event_type}} Event</span>
+                        {% endif %}
+
+                    </h3>
+
+                    <div class="timeline-body">
+                        <strong> {{event.description}}</strong>
+                        <div style="font-size: 100%; margin-top: 20px">
+                            {% if event.event_type == "physical"  %}
+                                <span class="text-bold">VENUE:: </span> <span>{{event.physical_venue.name}}</span><br>
+                                <span class="text-bold">CAPACITY:: </span> <span>{{event.physical_venue.capacity}}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+
+                    <div class="timeline-footer">
+                        {% if event.event_type == "physical"  %}
+                            <a target="_blank" href="https://www.google.com/maps/search/?api=1&query={{event.physical_venue.coordinate}}" class="btn btn-primary btn-xs">View Venue On Map</a>
+                        {% elif event.event_type == "virtual" %}
+                            <a target="_blank" href="{{event.meeting_link}}" class="btn btn-warning btn-flat btn-xs">Join the Virtual Meet</a>
+                        {% endif %}
+
+                        {% if event.has_poll  %}
+                            <a onclick="answerPoll({{event.id}}, 'No')" class="btn btn-danger btn-xs">Decline</a>
+                            <a onclick="answerPoll({{event.id}}, 'Maybe')" class="btn btn-default btn-xs">Maybe</a>
+                            <a onclick="answerPoll({{event.id}}, 'Yes')" class="btn btn-success btn-xs">Attend</a>
+                        {% endif  %}
+                    </div>
+                  </div>
+                </li>
+                <!-- END timeline item -->
+
+
+            {% endfor  %}
+
+
+            <!-- New Date -->
             <li class="time-label">
                   <span class="bg-red">
                     17 March. 2023
                   </span>
             </li>
-            <!-- /.timeline-label -->
-            <!-- timeline item -->
+
+            <!-- timeline item Start-->
             <li>
               <i class="fa fa-calendar bg-blue"></i>
 
@@ -74,7 +142,11 @@
               </div>
             </li>
             <!-- END timeline item -->
-            <!-- timeline time label -->
+
+
+
+
+            <!-- New Date -->
             <li class="time-label">
                   <span class="bg-green">
                     25 March. 2023
@@ -184,5 +256,35 @@
 
     </section>
     <!-- /.content -->
+
+{% endblock %}
+
+{% block extra_script %}
+  <script>
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  </script>
+
+    <script>
+        function answerPoll(id, answer) {
+            $.ajax({
+            url: "/api/scheduler/poll/",
+            type: 'POST',
+            data: {
+                'id': id,
+                'answer': answer,
+            },
+            dataType: "json",
+            headers: {'X-CSRFToken': csrftoken},
+            mode: 'same-origin',
+            success: function (response) {
+                if (response.success) {
+                    toastr["success"](response.message,"SUCCESS!")
+                } else {
+                    toastr["error"](response.message,"ERROR!")
+                }
+            },
+        })
+        }
+    </script>
 
 {% endblock %}

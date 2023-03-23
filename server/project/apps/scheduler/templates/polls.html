@@ -1,0 +1,120 @@
+{% extends 'blank.html' %}
+{% block title %}
+	<title>BABCOCK | My Polls</title>
+{% endblock %}
+
+{% block content %}
+{% load static %}
+{% csrf_token %}
+
+
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        My POLLS
+        <small>Personalised Event Polls</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><a href="#">Schedule Options</a></li>
+        <li class="active">Polls</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">My Polls</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example1" class="table table-bordered table-striped table-hover">
+                <thead>
+                <tr>
+                  <th>Event Title</th>
+                  <th>Start Date Time</th>
+                  <th>Event Type</th>
+                  <th>Event Venue</th>
+                  <th>Event Status</th>
+                  <th>Date Created</th>
+                  <th>Total Event Polls</th>
+                  <th>Positive Attendees</th>
+                  <th>Declined Attendees</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {% for event in events %}
+
+                  <tr>
+                    <td>{{event.title}}</td>
+                    <td>{{event.actual_start_datetime}}</td>
+                    <td>{{event.event_type}}</td>
+                    <td>{{event.get_venue}}</td>
+                    {% if event.status == "UP COMING" %}
+                      <td><span class="label label-success">{{event.status}}</span></td>
+                    {% elif event.status == "ONGOING" %}
+                      <td><span class="label label-warning">{{event.status}}</span></td>
+                    {% elif event.status == "PAST" %}
+                      <td><span class="label label-danger">{{event.status}}</span></td>
+                    {% endif %}
+                    <td>{{event.created_at}}</td>
+                    {% if event.has_poll %}
+                      <td><span class="badge bg-primary">{{event.polls.all.count}}</span></td>
+                      <td><span class="badge bg-green-active">{{event.get_positive_polls}}</span></td>
+                      <td><span class="badge bg-red-active">{{event.get_negative_polls}}</span></td>
+                    {% else %}
+                      <th>NOT A POLLED EVENT</th>
+                      <th>NOT A POLLED EVENT</th>
+                      <th>NOT A POLLED EVENT</th>
+                    {% endif %}
+                  </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                <tr>
+                  <th>Event Title</th>
+                  <th>Start Date Time</th>
+                  <th>Event Type</th>
+                  <th>Event Venue</th>
+                  <th>Event Status</th>
+                  <th>Date Created</th>
+                  <th>Total Event Polls</th>
+                  <th>Positive Attendees</th>
+                  <th>Declined Attendees</th>
+                </tr>
+                </tfoot>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        $(function () {
+            $('#example1').DataTable()
+            $('#example2').DataTable({
+                'paging'      : true,
+                'lengthChange': false,
+                'searching'   : false,
+                'ordering'    : true,
+                'info'        : true,
+                'autoWidth'   : false
+            })
+        })
+    </script>
+{% endblock %}

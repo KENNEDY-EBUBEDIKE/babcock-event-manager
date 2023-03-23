@@ -16,6 +16,8 @@
   <link rel="stylesheet" href="{% static 'bower_components/font-awesome/css/font-awesome.min.css' %}">
   <!-- Ionicons -->
   <link rel="stylesheet" href="{% static 'bower_components/Ionicons/css/ionicons.min.css' %}">
+    <!-- DataTables -->
+  <link rel="stylesheet" href="{% static 'bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css' %}">
     <!-- jvectormap -->
   <link rel="stylesheet" href="{% static 'bower_components/jvectormap/jquery-jvectormap.css' %}">
   <!-- fullCalendar -->
@@ -526,7 +528,7 @@
             </a>
             <ul class="treeview-menu">
               <li><a href="/schedule-event"><i class="fa fa-circle-o"></i> My events</a></li>
-              <li><a href="#"><i class="fa fa-circle-o"></i> Polls</a></li>
+              <li><a href="/polls"><i class="fa fa-circle-o"></i> Polls</a></li>
               <li><a href="/meeting-log"><i class="fa fa-circle-o"></i> Meeting Log</a></li>
               <li><a href="#"><i class="fa fa-circle-o"></i> Gallery </a></li>
             </ul>
@@ -804,6 +806,9 @@
   <script src="{% static 'plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js' %}"></script>
   <!-- ChartJS -->
   <script src="{% static 'bower_components/chart.js/Chart.js' %}"></script>
+  <!-- DataTables -->
+  <script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
   <!-- Slimscroll -->
   <script src="{% static 'bower_components/jquery-slimscroll/jquery.slimscroll.min.js' %}"></script>
   <!-- FastClick -->
@@ -845,6 +850,5 @@
     "hideMethod": "fadeOut"
   }
   </script>
-
 </body>
 </html>
