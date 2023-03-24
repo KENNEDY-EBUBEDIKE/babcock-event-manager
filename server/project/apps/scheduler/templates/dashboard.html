@@ -5,6 +5,7 @@
 
 {% block content %}
 {% load static %}
+{% load mathfilters %}
 
 <!-- Content Header (Page header) -->
     <section class="content-header">
@@ -26,9 +27,9 @@
           <!-- small box -->
           <div class="small-box bg-aqua">
             <div class="inner">
-              <h3>150</h3>
+              <h3 id="all_events" >{{all_events_count}}</h3>
 
-              <p>Upcoming Events</p>
+              <p>All Events</p>
             </div>
             <div class="icon">
               <i class="ion ion-bag"></i>
@@ -41,9 +42,9 @@
           <!-- small box -->
           <div class="small-box bg-green">
             <div class="inner">
-              <h3>53<sup style="font-size: 20px">%</sup></h3>
+              <h3>{{request.user.events.all.count}}<sup style="font-size: 20px"></sup></h3>
 
-              <p>Events Attended</p>
+              <p>My Events</p>
             </div>
             <div class="icon">
               <i class="ion ion-stats-bars"></i>
@@ -56,7 +57,7 @@
           <!-- small box -->
           <div class="small-box bg-yellow">
             <div class="inner">
-              <h3>{{users}}</h3>
+              <h3>{{users_count}}</h3>
 
               <p>Active Users</p>
             </div>
@@ -71,9 +72,9 @@
           <!-- small box -->
           <div class="small-box bg-red">
             <div class="inner">
-              <h3>65</h3>
+              <h3>{{polled_events_count}}</h3>
 
-              <p>Pending Events</p>
+              <p>Polled Events</p>
             </div>
             <div class="icon">
               <i class="ion ion-pie-graph"></i>
@@ -111,10 +112,10 @@
                 <!-- /.col -->
                 <div class="col-md-4">
                   <ul class="chart-legend clearfix">
-                    <li><i class="fa fa-circle-o text-red"></i> Upcoming Events</li>
-                    <li><i class="fa fa-circle-o text-green"></i> Attended Events</li>
-                    <li><i class="fa fa-circle-o text-yellow"></i> Pending Events</li>
-                    <li><i class="fa fa-circle-o text-aqua"></i> Past Events</li>
+                    <li><i class="fa fa-circle-o text-red"></i> All Events</li>
+                    <li><i class="fa fa-circle-o text-green"></i> My Events</li>
+                    <li><i class="fa fa-circle-o text-yellow"></i> Other Events</li>
+                    <li><i class="fa fa-circle-o text-aqua"></i> Polled Events</li>
                     <li><i class="fa fa-circle-o text-light-blue"></i> Unconfirmed Events</li>
                     <li><i class="fa fa-circle-o text-gray"></i> My Scheduled Events</li>
                   </ul>
@@ -126,9 +127,9 @@
             <!-- /.box-body -->
             <div class="box-footer no-padding">
               <ul class="nav nav-pills nav-stacked">
-                <li><a href="#">Created By Me
-                  <span class="pull-right text-red"> 12%</span></a></li>
-                <li><a href="#">Created By Others <span class="pull-right text-green"> 4%</span></a>
+                <li><a href="/polls">Created By Me
+                  <span class="pull-right text-red"> {{request.user.events.all.count}} </span></a></li>
+                <li><a href="#">Created By Others <span class="pull-right text-green"> {{ all_events_count|sub:request.user.events.all.count }} </span></a>
                 </li>
               </ul>
             </div>
@@ -162,46 +163,25 @@
                   </tr>
                   </thead>
                   <tbody>
-                  <tr>
-                    <td><a href="#">VC9842</a></td>
-                    <td>MATRICULATION CEREMONY</td>
-                    <td><span class="label label-success">UP COMING</span></td>
-                    <td>Thu Mar 16 2023 06:30:00 GMT+0000</td>
-                    <td>Physical</td>
-                    <td>
-                      <div class="sparkbar" data-color="#00a65a" data-height="20">584,269,698</div>
-                    </td>
+
+                  {% for event in recent_events %}
+                    <tr>
+                      <td><a href="#">VC9842</a></td>
+                      <td>{{event.title}}</td>
+                      <td><span class="label label-success">{{event.status}}</span></td>
+                      <td>{{event.actual_start_datetime}}</td>
+                      <td>{{event.event_type}}</td>
+
+                      {% if event.has_poll %}
+                        <td>
+                          <div class="sparkbar" data-color="#00a65a" data-height="20">{{event.get_positive_polls}}</div>
+                        </td>
+                      {% else %}
+                        <th>NOT A POLLED EVENT</th>
+                      {% endif %}
+
                   </tr>
-                  <tr>
-                    <td><a href="#">VC9842</a></td>
-                    <td>SENATE MEETING</td>
-                    <td><span class="label label-warning">ONGOING</span></td>
-                    <td>FRI Mar 17 2023 10:30:00 GMT+1000</td>
-                    <td>Physical</td>
-                    <td>
-                      <div class="sparkbar" data-color="#00a65a" data-height="20">1,269</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><a href="#">CHM9842</a></td>
-                    <td>FRESHERS NITE</td>
-                    <td><span class="label label-danger">PAST</span></td>
-                    <td>TUE Mar 10 2023 06:30:00 GMT+0000</td>
-                    <td>Physical</td>
-                    <td>
-                      <div class="sparkbar" data-color="#00a65a" data-height="20">1,269,569</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><a href="#">VC9842</a></td>
-                    <td>GOOGLE DEVELOPER COMMUNITY</td>
-                    <td><span class="label label-danger">PAST</span></td>
-                    <td>TUE Mar 10 2023 06:30:00 GMT+0000</td>
-                    <td>Virtual</td>
-                    <td>
-                      <div class="sparkbar" data-color="#00a65a" data-height="20">5,698,569</div>
-                    </td>
-                  </tr>
+                  {% endfor %}
                   </tbody>
                 </table>
               </div>
@@ -210,12 +190,11 @@
             <!-- /.box-body -->
             <div class="box-footer clearfix">
               <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-left">Refresh</a>
-              <a href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right">View All Events</a>
+              <a href="/meeting-log" class="btn btn-sm btn-default btn-flat pull-right">View All Events</a>
             </div>
             <!-- /.box-footer -->
           </div>
           <!-- /.box -->
-
         </section>
         <!-- /.Left col -->
         <!-- right col (We are only adding the ID to make the widgets sortable)-->

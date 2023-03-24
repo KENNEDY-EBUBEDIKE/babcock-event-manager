@@ -6,8 +6,16 @@ from apps.users.models import User
 
 @login_required()
 def dashboard(request):
-    users = User.objects.all().count()
-    return render(request, 'dashboard.html', {"users": users})
+    users_count = User.objects.all().count()
+    all_events_count = Event.objects.all().count()
+    polled_events_count = Event.objects.filter(has_poll=True).count()
+    recent_events = Event.objects.all().order_by('actual_start_datetime')[:5]
+    return render(request, 'dashboard.html', {
+        "users_count": users_count,
+        "all_events_count": all_events_count,
+        "polled_events_count": polled_events_count,
+        "recent_events": recent_events,
+    })
 
 
 @login_required()
