@@ -22,6 +22,7 @@ def events(request):
 @api_view(["POST", "PATCH", "DELETE"])
 def event(request):
     if request.method == "POST":
+        print(request.data)
 
         # Academic Calendar Constraint
         start_datetime = datetime.fromtimestamp(int(request.data['start']) / 1000, tz=timezone('Africa/Lagos'))

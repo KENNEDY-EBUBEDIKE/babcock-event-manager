@@ -4,18 +4,21 @@ from apps.scheduler.models import Event, Venue, Poll
 from apps.users.models import User
 
 
-@login_required()
+# @login_required()
 def dashboard(request):
-    users_count = User.objects.all().count()
-    all_events_count = Event.objects.all().count()
-    polled_events_count = Event.objects.filter(has_poll=True).count()
-    recent_events = Event.objects.all().order_by('actual_start_datetime')[:5]
-    return render(request, 'dashboard.html', {
-        "users_count": users_count,
-        "all_events_count": all_events_count,
-        "polled_events_count": polled_events_count,
-        "recent_events": recent_events,
-    })
+    if request.user.is_authenticated:
+        users_count = User.objects.all().count()
+        all_events_count = Event.objects.all().count()
+        polled_events_count = Event.objects.filter(has_poll=True).count()
+        recent_events = Event.objects.all().order_by('actual_start_datetime')[:5]
+        return render(request, 'dashboard.html', {
+            "users_count": users_count,
+            "all_events_count": all_events_count,
+            "polled_events_count": polled_events_count,
+            "recent_events": recent_events,
+        })
+    else:
+        return redirect('/users/login/')
 
 
 @login_required()

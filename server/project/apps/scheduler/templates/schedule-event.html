@@ -31,10 +31,10 @@
               <div class="box-body">
                 <!-- the events -->
                 <div id="external-events">
-                  <div class="external-event bg-fuchsia">
-                    <span class="title">DEMO EVENT</span>
-                    <span hidden class="start">12:30 PM</span>
-                  </div>
+<!--                  <div class="external-event bg-fuchsia">-->
+<!--                    <span class="title">DEMO EVENT</span>-->
+<!--                    <span hidden class="start">12:30 PM</span>-->
+<!--                  </div>-->
                   <div class="checkbox">
                     <label for="drop-remove">
                       <input type="checkbox" id="drop-remove">
@@ -79,12 +79,11 @@
 
                   <input style="margin-top: 10px" id="new-event-link" type="text" class="form-control" placeholder="Meeting Link">
                   <select id="venue_list" class="form-control" style="width: 100%;margin-top: 10px">
-                    <option selected="selected">Select Venue</option>
+                    <option selected="selected" value="">Select Venue</option>
 
                     {% for venue in venues %}
                       <option>
-                        <span style="color: red">{{venue.name}}</span>
-<!--                        <span style="color: green">{{venue.capacity}}</span>-->
+                        {{venue.name}}
                       </option>
                     {% endfor %}
                   </select>
@@ -182,6 +181,30 @@
         </div>
         <!-- /.modal -->
 
+
+        <div class="modal modal-danger fade" id="delete-event-modal">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Delete Event</h4>
+              </div>
+              <div class="modal-body">
+                <p style="text-align: center; font-size: larger; font-weight: bolder">YOU ARE ABOUT TO DELETE AN EVENT!!!.</p>
+                <p style="text-align: center; font-size: large;">Do you want to Proceed?.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                <button id="eventDelete" type="button" class="btn btn-danger">DELETE</button>
+              </div>
+            </div>
+            <!-- /.modal-content -->
+          </div>
+          <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
 {% endblock %}
 
 {% block extra_script %}
@@ -250,7 +273,7 @@
         events    : allEvents,
         editable  : true,
         droppable : true, // this allows things to be dropped onto the calendar !!!
-        drop      : function (date, allDay) { // this function is called when something is dropped
+        drop      : function (date, allDay) {
 
           // retrieve the dropped element's stored Event Object
           let originalEventObject = $(this).data('eventObject')
@@ -267,6 +290,7 @@
           // render the event on the calendar
           let venue;
           let event_type;
+          event_type = "virtual"
           if ( $(this).find('span.event_type_switch').text() === "true") {
             venue = $(this).find('span.venue_list').text()
             event_type = "physical"
@@ -275,16 +299,16 @@
             event_type = "virtual"
           }
 
-          addEvent(
-              copiedEventObject.title,
-              Date.parse(date.toString()),
-              $(this).find('span.description').text(),
-              venue,
-              event_type,
-              $(this).find('span.has_poll').text(),
-              $(this).css('background-color'),
-              $(this).css('border-color')
-          )
+          addEvent({
+            'title':copiedEventObject.title,
+            'start':Date.parse(date.toString()),
+            'description':$(this).find('span.description').text(),
+            'venue':venue,
+            'event_type':event_type,
+            'poll':$(this).find('span.has_poll').text(),
+            'backgroundColor':$(this).css('background-color'),
+            'borderColor':$(this).css('border-color')
+          })
           .then(event => {
               copiedEventObject.id = event.id
               originalEventObject.id = event.id
@@ -330,7 +354,6 @@
         },
         eventClick: function(event, jsEvent, view) {
           // Calls this function when an event is clicked
-          $('#calendar').fullCalendar('getCalendar').removeEvents(event.id);
           deleteEvent(event);
         }
       })
@@ -361,6 +384,11 @@
 
         if (event_title.length === 0 || event_date.length === 0 || event_time.length === 0) {
           toastr["warning"]("Please check the fields","WARNING!")
+          return
+        }
+
+        if(venue_list.val().length === 0 && meeting_link.val().length === 0){
+          toastr["warning"]("Please Select venue or add meeting Link","WARNING!")
           return
         }
 
@@ -430,6 +458,7 @@
           // Push to backend
           let venue;
           let event_type;
+          event_type = "virtual"
           if ($('#venue-switch').is(':checked')) {
             venue = $('#venue_list').val()
             event_type = "physical"
@@ -437,16 +466,19 @@
             venue = $('#new-event-link').val()
             event_type = "virtual"
           }
-          addEvent(
-                  copiedEventObject.title,
-                  timeStamp,
-                  desc.val(),
-                  venue,
-                  event_type,
-                  $('#create_poll').is(':checked'),
-                  $(this).css('background-color'),
-                  $(this).css('border-color')
-          )
+
+
+
+          addEvent({
+            'title': copiedEventObject.title,
+            'start': timeStamp,
+            'description': desc.val(),
+            'venue': venue,
+            'event_type': event_type,
+            'poll': $('#create_poll').is(':checked'),
+            'backgroundColor': $(this).css('background-color'),
+            'borderColor': $(this).css('border-color')
+        })
           .then(event => {
               copiedEventObject.id = event.id
               // Add to the calendar
@@ -476,28 +508,21 @@
   </script>
 
   <script>
-    addEvent = (title,
-                start,
-                description,
-                venue,
-                event_type,
-                poll,
-                backgroundColor,
-                borderColor) => {
+    addEvent = (options) => {
 
       return new Promise((resolve, reject) => {
           $.ajax({
               url: "/api/scheduler/event/",
               type: 'POST',
               data: {
-                  'title': title,
-                  'description': description,
-                  'venue': venue,
-                  'event_type': event_type,
-                  'background_color': backgroundColor,
-                  'border_color': borderColor,
-                  'start': start,
-                  'poll': poll,
+                  'title': options.title,
+                  'description': options.description,
+                  'venue': options.venue,
+                  'event_type': options.event_type,
+                  'background_color': options.backgroundColor,
+                  'border_color': options.borderColor,
+                  'start': options.start,
+                  'poll': options.poll,
               },
               dataType: "json",
               headers: {'X-CSRFToken': csrftoken},
@@ -547,7 +572,11 @@
     }
 
     deleteEvent = (event)=>{
-      $.ajax({
+      $('#delete-event-modal').modal('show');
+
+      $("#eventDelete").click(function() {
+        $('#delete-event-modal').modal('hide');
+        $.ajax({
             url: "/api/scheduler/event/",
             type: 'DELETE',
             data: {
@@ -559,11 +588,14 @@
             success: function (response) {
                 if (response.success) {
                     toastr["success"](response.message,"SUCCESS!")
+                    $('#calendar').fullCalendar('getCalendar').removeEvents(event.id);
                 } else {
                     toastr["error"](response.message,"ERROR!")
                 }
             },
         })
+      });
+
     }
   </script>
 
