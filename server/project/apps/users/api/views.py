@@ -28,6 +28,7 @@ def signup(request):
 
     new_user.first_name = request.data['first_name']
     new_user.surname = request.data['last_name']
+    new_user.department = request.data['department']
     new_user.save()
 
     if request.data['is_staff'] == "true":

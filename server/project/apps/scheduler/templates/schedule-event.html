@@ -88,7 +88,7 @@
                     {% endfor %}
                   </select>
                     {% if request.user.is_staff %}
-                    <button type="button" id="add-venue" class="btn btn-success" data-toggle="modal" data-target="#add-venue-modal" ><i class="fa fa-plus bg-green"></i></button>
+                      <button type="button" id="add-venue" class="btn btn-success" data-toggle="modal" data-target="#add-venue-modal" ><i class="fa fa-plus bg-green"></i></button>
                     {% endif  %}
 
                   <div style="margin-top: 20px" class="">
@@ -106,6 +106,17 @@
                       Create Poll For Event
                     </label>
                 </div>
+                {% if request.user.is_superuser %}
+
+                    <div class="checkbox">
+                      <label for="academic-calendar">
+                        <input type="checkbox" id="academic-calendar">
+                        Set as Academic Calendar Event
+                      </label>
+                  </div>
+
+                {% endif %}
+
                 <div class="checkbox">
                     <label for="add_immediately">
                       <input type="checkbox" id="add_immediately">
@@ -149,7 +160,7 @@
             </div>
             <!-- /.box-header -->
             <!-- form start -->
-            <form role="form" method="POST" action="/scheduler/add-venue"> {% csrf_token %}
+            <form role="form" method="POST" action="/scheduler/add-venue" onsubmit="createVenue(event)"> {% csrf_token %}
               <div class="box-body">
                 <div class="form-group">
                   <label for="name">Name</label>
@@ -163,6 +174,14 @@
                   <label for="coordinate">Coordinate</label>
                   <input type="text" class="form-control" name="coordinate" id="coordinate" placeholder="Coordinate">
                 </div>
+                <label for="coordinate">FACILITY FEATURES</label>
+                <p>
+                    <button class="btn btn-success" id="add-facility-feature" style="margin-top: 15px" type="button"><i class="fa fa-plus"></i>Add</button>
+                </p>
+
+
+                <div class="form-group" id="facility-features" > </div>
+
               </div>
                 <div class="box-footer">
                   <button type="submit" class="btn btn-primary pull-right">Submit</button>
@@ -183,37 +202,104 @@
 
 
         <div class="modal modal-danger fade" id="delete-event-modal">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Delete Event</h4>
-              </div>
-              <div class="modal-body">
-                <p style="text-align: center; font-size: larger; font-weight: bolder">YOU ARE ABOUT TO DELETE AN EVENT!!!.</p>
-                <p style="text-align: center; font-size: large;">Do you want to Proceed?.</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-                <button id="eventDelete" type="button" class="btn btn-danger">DELETE</button>
-              </div>
-            </div>
-            <!-- /.modal-content -->
+        <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Delete Event</h4>
           </div>
-          <!-- /.modal-dialog -->
+          <div class="modal-body">
+            <p style="text-align: center; font-size: larger; font-weight: bolder">YOU ARE ABOUT TO DELETE AN EVENT!!!.</p>
+            <p style="text-align: center; font-size: large;">Do you want to Proceed?.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+            <button id="eventDelete" type="button" class="btn btn-danger">DELETE</button>
+          </div>
+        </div>
+        <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
         </div>
         <!-- /.modal -->
+
+        <div class="modal modal-primary fade" id="venue-info">
+        <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Event Venue Info</h4>
+          </div>
+          <div class="modal-body" style="padding: 0">
+            <p style="text-align: center; font-size: xx-large; font-weight: bolder" id="v-name">Event Venue Info.</p>
+          <div>
+          <!-- Widget: user widget style 1 -->
+              <div class=" box-widget widget-user">
+                <!-- Add the bg color to the header using any of the bg-* classes -->
+                <div class="widget-user-header bg-black" style="background: url({% static 'images/babcock-hall2.jpeg' %}) center center;">
+                </div>
+                <div class="box-footer" style="color: black">
+                  <div class="row">
+                    <div class="col-sm-4 border-right">
+                      <div class="description-block">
+                        <h5 class="description-header" id="v-name2">CIT</h5>
+                        <span class="description-text">Name</span>
+                      </div>
+                      <!-- /.description-block -->
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-sm-4 border-right">
+                      <div class="description-block">
+                        <h5 class="description-header" id="v-capacity">13,000</h5>
+                        <span class="description-text">Capacity</span>
+                      </div>
+                      <!-- /.description-block -->
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-sm-4">
+                      <div class="description-block">
+                        <a id="location-btn" target="_blank" type="button" class="btn btn-warning" href="https://www.google.com/maps/search/?api=1&query=666.6658,44533698.25">View Location </a>
+        <!--                                <span class="description-text">Map Location</span>-->
+                      </div>
+                      <!-- /.description-block -->
+                    </div>
+                    <!-- /.col -->
+                  </div>
+                  <!-- /.row -->
+                </div>
+                <div class="box-footer no-padding">
+                    <ul class="nav nav-stacked" id="venueFeatures">
+                    </ul>
+                </div>
+              </div>
+          <!-- /.widget-user -->
+        </div>
+        <!-- /.col -->
+            <p style="text-align: center; font-size: large;">Do you want to Choose this venue?.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+            <button id="chooseVenue" data-dismiss="modal" type="button" class="btn btn-success">CHOOSE</button>
+          </div>
+        </div>
+        <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
 
 {% endblock %}
 
 {% block extra_script %}
 
-  <script>
+    <script>
       const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-  </script>
+    </script>
 
-  <script>
+    <script>
     let allEvents;
     getEvents = ()=>{
       fetch('/api/scheduler/events')
@@ -307,7 +393,8 @@
             'event_type':event_type,
             'poll':$(this).find('span.has_poll').text(),
             'backgroundColor':$(this).css('background-color'),
-            'borderColor':$(this).css('border-color')
+            'borderColor':$(this).css('border-color'),
+            'academic_calendar': $(this).find('span.academic_calendar').text(),
           })
           .then(event => {
               copiedEventObject.id = event.id
@@ -381,6 +468,7 @@
         let desc = $('#new-event-description')
         let venue_list = $('#venue_list')
         let meeting_link = $('#new-event-link')
+        let academic_calendar_checkbox = $('#academic-calendar')
 
         if (event_title.length === 0 || event_date.length === 0 || event_time.length === 0) {
           toastr["warning"]("Please check the fields","WARNING!")
@@ -408,6 +496,7 @@
         let dom_meeting_link = $('<span />').addClass('meeting_link').appendTo(event);
         let dom_event_type = $('<span />').addClass('event_type_switch').appendTo(event);
         let dom_has_poll = $('<span />').addClass('has_poll').appendTo(event);
+        let dom_academic_calendar = $('<span />').addClass('academic_calendar').appendTo(event);
 
         title.html(event_title)
         date.html(event_date).prop('hidden', true);
@@ -423,6 +512,11 @@
             dom_has_poll.html("true").prop('hidden', true);
         }else {
             dom_has_poll.html("false").prop('hidden', true);
+        }
+        if(academic_calendar_checkbox.is(':checked')) {
+            dom_academic_calendar.html("true").prop('hidden', true);
+        }else {
+            dom_academic_calendar.html("false").prop('hidden', true);
         }
 
         const [year, month, day] = event_date.split('-');
@@ -467,8 +561,6 @@
             event_type = "virtual"
           }
 
-
-
           addEvent({
             'title': copiedEventObject.title,
             'start': timeStamp,
@@ -477,7 +569,8 @@
             'event_type': event_type,
             'poll': $('#create_poll').is(':checked'),
             'backgroundColor': $(this).css('background-color'),
-            'borderColor': $(this).css('border-color')
+            'borderColor': $(this).css('border-color'),
+            'academic_calendar': $('#academic-calendar').is(':checked')
         })
           .then(event => {
               copiedEventObject.id = event.id
@@ -505,9 +598,9 @@
       /* ADDING EVENTS  END*/
     })
     }
-  </script>
+    </script>
 
-  <script>
+    <script>
     addEvent = (options) => {
 
       return new Promise((resolve, reject) => {
@@ -523,6 +616,7 @@
                   'border_color': options.borderColor,
                   'start': options.start,
                   'poll': options.poll,
+                  'academic_calendar': options.academic_calendar,
               },
               dataType: "json",
               headers: {'X-CSRFToken': csrftoken},
@@ -595,11 +689,10 @@
             },
         })
       });
-
     }
-  </script>
+    </script>
 
-  <script>
+    <script>
 
     $(document).ready(function() {
       $("#venue_list").hide();
@@ -618,7 +711,112 @@
       });
     });
 
-  </script>
+    </script>
+
+    <script>
+        $(document).ready(function() {
+
+            $("#venue_list").on("change", function() {
+                const selectedOption = $(this).val();
+                $.ajax({
+                    url: "/api/scheduler/venue/",
+                    type: 'POST',
+                    data: {
+                        'name': selectedOption,
+                    },
+                    dataType: "json",
+                    headers: {'X-CSRFToken': csrftoken},
+                    mode: 'same-origin',
+                    success: function (response) {
+                        if (response.success) {
+                            $('#venueFeatures').empty()
+                            $("#v-name").text(response.venue.name)
+                            $("#v-name2").text(response.venue.name)
+                            $("#v-capacity").text(response.venue.capacity)
+                            let map_location = 'https://www.google.com/maps/search/?api=1&query=' + response.venue.coordinate;
+                            $('#location-btn').attr('href', map_location);
+                            for (let feature in response.venue.features) {
+                                let li = $('<li />')
+                                let a = $('<a />');
+                                let span;
+                                if (feature.toLowerCase().includes("board")){
+                                    span = $('<span />').addClass('pull-right badge bg-aqua')
+                                }else if (feature.toLowerCase().includes("inverter")){
+                                    span = $('<span />').addClass('pull-right badge bg-red')
+                                }else if (feature.toLowerCase().includes("seats")){
+                                    span = $('<span />').addClass('pull-right badge bg-green')
+                                }else if (feature.toLowerCase().includes("fan")){
+                                    span = $('<span />').addClass('pull-right badge bg-orange')
+                                }else{
+                                    span = $('<span />').addClass('pull-right badge bg-blue')
+                                }
+                                a.attr('href', '#');
+                                a.html(feature);
+                                span.html(response.venue.features[feature]).appendTo(a)
+                                a.appendTo(li)
+                                $('#venueFeatures').prepend(li)
+                            }
+                            $('#venue-info').modal('show');
+                        } else {
+                            toastr["error"](response.message,"ERROR!")
+                        }
+                    },
+                })
+            });
+        });
+    </script>
+
+    <script>
+
+        $(document).ready(function() {
+
+            $("#add-facility-feature").on("click", function() {
+                let parent_div = $('<div />');
+                let feature_div = $('<div />').addClass('col-md-6');
+                let quantity_div = $('<div />').addClass('col-md-6');
+                $('<label />').html("Feature").appendTo(feature_div)
+                $('<label />').html("Quantity").appendTo(quantity_div)
+
+                let feature_input = $('<input />').addClass('form-control').attr("type", "text").attr("placeholder", "Feature").appendTo(feature_div);
+                $('<input />').addClass('form-control').attr("type", "number").attr("placeholder", "Quantity").appendTo(quantity_div);
+
+                feature_div.appendTo(parent_div)
+                quantity_div.appendTo(parent_div)
+                $('#facility-features').prepend(parent_div)
+                feature_input.focus();
+            });
+        });
+        createVenue = (event)=>{
+            event.preventDefault()
+            let facilitiesObject = {};
+            $('#facility-features > div').each(function() {
+              let facility = $(this).find('input:eq(0)').val();
+              facilitiesObject[facility] = $(this).find('input:eq(1)').val();
+            });
+            $.ajax({
+                url: "/api/scheduler/create-venue/",
+                type: 'POST',
+                data: {
+                    'name': $("#name").val(),
+                    'capacity': $("#capacity").val(),
+                    'coordinate': $("#coordinate").val(),
+                    'facilities': JSON.stringify(facilitiesObject),
+                },
+                dataType: "json",
+                headers: {'X-CSRFToken': csrftoken},
+                mode: 'same-origin',
+                success: function (response) {
+                    if (response.success) {
+                        setTimeout(toastr["success"](response.message,"SUCCESS!"), parseInt("1500"))
+                        location.reload()
+                    } else {
+                        toastr["error"](response.message,"ERROR!")
+                    }
+                },
+            })
+        }
+
+    </script>
 
 
 {% endblock %}

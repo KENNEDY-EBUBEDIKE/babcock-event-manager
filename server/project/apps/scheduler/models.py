@@ -75,6 +75,7 @@ class Venue(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, unique=True)
     capacity = models.IntegerField(null=True, blank=True)
     coordinate = models.CharField(max_length=255, blank=True, null=True)
+    features = models.JSONField(default=dict)
 
     def __str__(self):
         return self.name

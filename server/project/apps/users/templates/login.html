@@ -99,9 +99,14 @@
                         <label class="form-label" for="first_name">First Name</label>
                       </div>
 
-                        <div class="form-outline mb-4">
+                      <div class="form-outline mb-4">
                         <input name="last_name" type="text" id="last_name" class="form-control" placeholder="Last Name" />
                         <label class="form-label" for="last_name">Last Name</label>
+                      </div>
+
+                      <div class="form-outline mb-4">
+                        <input name="department" type="text" id="department" class="form-control" placeholder="Department" />
+                        <label class="form-label" for="department">Department</label>
                       </div>
 
                       <div class="form-outline mb-4">
@@ -166,6 +171,12 @@
         }
 
         signup = ()=>{
+
+          if ($('#last_name').val().length === 0 || $('#first_name').val().length === 0 || $('#department').val().length === 0) {
+            toastr["warning"]("Please check the fields","WARNING!")
+            return
+          }
+
             $.ajax({
                 url: "/api/users/signup/",
                 type: 'POST',
@@ -175,6 +186,7 @@
                     'password': $('#pass').val(),
                     'first_name': $('#first_name').val(),
                     'last_name': $('#last_name').val(),
+                    'department': $('#department').val(),
                     'is_staff': $('#staff').is(':checked'),
                 },
                 dataType: "json",

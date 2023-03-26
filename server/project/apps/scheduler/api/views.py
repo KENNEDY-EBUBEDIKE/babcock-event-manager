@@ -2,10 +2,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from apps.scheduler.models import Event, Venue, Poll
-from apps.scheduler.serializers import EventSerializer
+from apps.scheduler.serializers import EventSerializer, VenueSerializer
 from datetime import datetime
 from pytz import timezone
 from django.db import IntegrityError
+import json
 
 
 @api_view(["GET"])
@@ -14,6 +15,44 @@ def events(request):
         data={
             "success": True,
             "events": EventSerializer(Event.objects.all(), many=True).data
+        },
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(["POST"])
+def get_venue(request):
+    return Response(
+        data={
+            "success": True,
+            "venue": VenueSerializer(Venue.objects.get(name=request.data['name'])).data
+        },
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(["POST"])
+def create_venue(request):
+    if request.method == "POST":
+        new_venue = Venue()
+        new_venue.name = request.data.get("name").upper()
+        new_venue.capacity = request.data.get("capacity")
+        new_venue.coordinate = request.data.get("coordinate", None)
+        new_venue.features = json.loads(request.data['facilities'])
+        try:
+            new_venue.save()
+        except Exception as e:
+            return Response(
+                data={
+                    "success": False,
+                    "message": e.args[0]
+                },
+                status=status.HTTP_200_OK,
+            )
+    return Response(
+        data={
+            "success": True,
+            "message": "Venue Created Successfully"
         },
         status=status.HTTP_200_OK,
     )
@@ -64,6 +103,8 @@ def event(request):
         new_event.borderColor = request.data['border_color']
 
         new_event.has_poll = True if request.data['poll'] == "true" else False
+
+        new_event.is_from_academic_calendar = True if request.user.is_superuser and request.data['academic_calendar'] == "true" else False
 
         try:
             new_event.save()
@@ -142,14 +183,24 @@ def event(request):
                 status=status.HTTP_200_OK,
             )
     elif request.method == "DELETE":
-        Event.objects.get(id=request.data['id']).delete()
-        return Response(
-            data={
-                "success": True,
-                "message": "Deleted Successfully"
-            },
-            status=status.HTTP_200_OK,
-        )
+        event = Event.objects.get(id=request.data['id'])
+        if event.created_by == request.user:
+            event.delete()
+            return Response(
+                data={
+                    "success": True,
+                    "message": "Deleted Successfully"
+                },
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(
+                data={
+                    "success": False,
+                    "message": "You Cannot Delete an even you did not create!!"
+                },
+                status=status.HTTP_200_OK,
+            )
 
 
 @api_view(["POST"])

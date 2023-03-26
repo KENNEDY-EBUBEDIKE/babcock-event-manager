@@ -1,9 +1,11 @@
 from django.urls import path
 from django.conf import settings
-from .views import event, events, create_poll
+from .views import event, events, create_poll, get_venue, create_venue
 
 urlpatterns = [
     path('event/', event, name='event'),
+    path('venue/', get_venue, name='get_venue'),
+    path('create-venue/', create_venue, name='create_venue'),
     path('events/', events, name='events'),
     path('poll/', create_poll, name='create_poll'),
 ]

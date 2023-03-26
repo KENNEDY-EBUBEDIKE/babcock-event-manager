@@ -49,16 +49,21 @@
                     <span class="time"><i class="fa fa-clock-o"></i> {{event.actual_start_datetime.time}}</span>
 
                     {% if event.has_poll  %}
-                      <h1 class="card text-center"><b><strong>POLL</strong></b></h1>
+                        <h2 class=" text-center"><i class="fa-solid fa-box fa-shake fa-lg"></i><b><strong> <a href="#">{{event.title}}</a></strong></b></h2>
+                    {% else %}
+                        <h2 class=" text-center"><b><strong> <a href="#">{{event.title}}</a></strong></b></h2>
                     {% endif  %}
 
+
+
                       <h3 class="timeline-header">
-                        <a href="#">{{event.title}}</a>
                         {% if event.event_type == "physical"  %}
                             <span class="bg bg-warning" style="padding: 5px">{{event.event_type}} Event</span>
                         {% elif event.event_type == "virtual" %}
                             <span class="bg bg-primary" style="padding: 5px">{{event.event_type}} Event</span>
                         {% endif %}
+                          <span>  Scheduled By:: {{event.created_by.first_name}} {{event.created_by.surname}}</span>
+                          <span style="margin-left: 40px">  From::  {{event.created_by.department}} Department</span>
 
                     </h3>
 
