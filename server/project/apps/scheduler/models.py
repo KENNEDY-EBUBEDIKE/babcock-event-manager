@@ -46,11 +46,15 @@ class Event(models.Model):
 
     def get_positive_polls(self):
         if self.has_poll:
-                return self.polls.filter(attending__iexact='yes').aggregate(Count('id'))['id__count']
+            return self.polls.filter(attending__iexact='yes').aggregate(Count('id'))['id__count']
 
     def get_negative_polls(self):
         if self.has_poll:
             return self.polls.filter(attending__iexact='no').aggregate(Count('id'))['id__count']
+
+    def get_undecided_polls(self):
+        if self.has_poll:
+            return self.polls.filter(attending__iexact='maybe').aggregate(Count('id'))['id__count']
 
 
 class Poll(models.Model):

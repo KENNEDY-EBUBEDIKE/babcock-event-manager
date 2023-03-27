@@ -1,0 +1,192 @@
+{% extends 'blank.html' %}
+{% block title %}
+	<title>BABCOCK | All Users</title>
+{% endblock %}
+
+{% block content %}
+{% load static %}
+{% csrf_token %}
+
+
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        Users
+        <small>Active Users</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Users</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Platform Users</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example1" class="table table-bordered table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Surname</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                  {% for user in users %}
+                    <tr>
+                        <td>{{user.username}}</td>
+                        <td>{{user.first_name}}</td>
+                        <td>{{user.surname}}</td>
+                        <td>{{user.email}}</td>
+                        <td>{{user.department}}</td>
+
+                        {% if user.is_superuser %}
+                        <td>Super Admin</td>
+                        {% elif user.is_staff %}
+                        <td>Staff</td>
+                        {% else %}
+                        <td>Student</td>
+                        {% endif %}
+
+                        <td>
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-success">Settings</button>
+                              <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                              </button>
+                              <ul class="dropdown-menu" role="menu">
+                                <li><a href="#" onclick="elevateToAdmin({{user.id}})">Change To Admin</a></li>
+                                <li><a href="#" onclick="elevateToStaff({{user.id}})">Change To Staff </a></li>
+                                <li class="divider"></li>
+                                <li class="bg-red-active"><a href="#" onclick="deleteUser({{user.id}})" class="text-bold" style="color: white">Delete User</a></li>
+                              </ul>
+                            </div>
+
+                        </td>
+                    </tr>
+                  {% endfor %}
+
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Surname</th>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </tfoot>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        $(function () {
+            $('#example1').DataTable()
+            $('#example2').DataTable({
+                'paging'      : true,
+                'lengthChange': false,
+                'searching'   : false,
+                'ordering'    : true,
+                'info'        : true,
+                'autoWidth'   : false
+            })
+        })
+    </script>
+
+    <script>
+      elevateToAdmin = (id)=>{
+          $.ajax({
+                url: "/api/users/change-status/",
+                type: 'POST',
+                data: {
+                    'id': id,
+                    'to': 'admin',
+                },
+                dataType: "json",
+                headers: {'X-CSRFToken': csrftoken},
+                mode: 'same-origin',
+                success: function (response) {
+                    if (response.success) {
+                        setTimeout(toastr["success"](response.message,"SUCCESS!"), 5000)
+                        location.reload()
+                    } else {
+                        toastr["error"](response.message,"ERROR!")
+                    }
+                },
+            })
+      }
+
+      elevateToStaff = (id)=>{
+          $.ajax({
+                url: "/api/users/change-status/",
+                type: 'POST',
+                data: {
+                    'id': id,
+                    'to': 'staff',
+                },
+                dataType: "json",
+                headers: {'X-CSRFToken': csrftoken},
+                mode: 'same-origin',
+                success: function (response) {
+                    if (response.success) {
+                        setTimeout(toastr["success"](response.message,"SUCCESS!"), 5000)
+                        location.reload()
+                    } else {
+                        toastr["error"](response.message,"ERROR!")
+                    }
+                },
+            })
+      }
+
+      deleteUser = (id)=>{
+          $.ajax({
+                url: "/api/users/delete-user/",
+                type: 'POST',
+                data: {
+                    'id': id,
+                },
+                dataType: "json",
+                headers: {'X-CSRFToken': csrftoken},
+                mode: 'same-origin',
+                success: function (response) {
+                    if (response.success) {
+                        setTimeout(toastr["success"](response.message,"SUCCESS!"), 5000)
+                        location.reload()
+                    } else {
+                        toastr["error"](response.message,"ERROR!")
+                    }
+                },
+            })
+      }
+
+    </script>
+{% endblock %}

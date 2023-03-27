@@ -89,3 +89,62 @@ def verify_user(request):
             },
             status=status.HTTP_200_OK,
         )
+
+
+@api_view(["POST"])
+def update_profile_picture(request):
+    if request.data['photo']:
+        user = request.user
+        user.update_profile_photo(request.data['photo'])
+        user.save()
+
+        return Response(
+            data={
+                "success": True,
+                "photo": user.photo.url,
+                "message": "Photo updated Successfully"
+            },
+            status=status.HTTP_200_OK,
+        )
+    else:
+        return Response(
+            data={
+                "success": False,
+                'message': "Empty Image Selection"
+            },
+            status=status.HTTP_200_OK,
+
+        )
+
+
+@api_view(["POST"])
+def change_status(request):
+    if request.user.is_superuser:
+        user = User.objects.get(id=request.data['id'])
+        if request.data['to'] == "admin":
+            user.is_superuser = True
+
+        elif request.data['to'] == "staff":
+            user.is_staff = True
+
+        user.save()
+        return Response(
+            data={
+                "success": True,
+                "message": "Status Changed Successfully"
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+@api_view(["POST"])
+def delete_user(request):
+    if request.user.is_superuser:
+        User.objects.get(id=request.data['id']).delete()
+        return Response(
+            data={
+                "success": True,
+                "message": "Users Deleted Successfully"
+            },
+            status=status.HTTP_200_OK,
+        )

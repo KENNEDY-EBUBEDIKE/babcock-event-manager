@@ -1,5 +1,6 @@
 from django.db import models
 from django.db import models, IntegrityError
+import os
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 
 
@@ -42,6 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateField(auto_now_add=True)
+    photo = models.ImageField(upload_to='image/', null=True, blank=True)
 
     objects = UserProfileManager()
 
@@ -52,6 +54,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+    def update_profile_photo(self, photo):
+        if self.photo:
+            os.remove(self.photo.path)
+        self.photo = photo
 
 
 class StudentProfile(models.Model):

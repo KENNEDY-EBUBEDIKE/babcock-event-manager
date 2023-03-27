@@ -1,4 +1,4 @@
-from .views import login_view
+from .views import login_view, users
 from django.urls import path
 from django.conf import settings
 from django.contrib.auth import views as auth_view
@@ -7,6 +7,7 @@ from django.contrib.auth import views as auth_view
 urlpatterns = [
     path('login/', login_view, name='login'),
     path('logout/', auth_view.LogoutView.as_view(), name='logout'),
+    path('all-users/', users, name='users'),
 ]
 
 if settings.DEBUG:

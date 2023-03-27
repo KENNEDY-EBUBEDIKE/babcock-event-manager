@@ -43,6 +43,7 @@
                   <th>Date Created</th>
                   <th>Total Event Polls</th>
                   <th>Positive Attendees</th>
+                  <th>Undecided Attendees (Maybe)</th>
                   <th>Declined Attendees</th>
                 </tr>
                 </thead>
@@ -66,8 +67,10 @@
                     {% if event.has_poll %}
                       <td><span class="badge bg-primary">{{event.polls.all.count}}</span></td>
                       <td><span class="badge bg-green-active">{{event.get_positive_polls}}</span></td>
+                      <td><span class="badge bg-yellow-active">{{event.get_undecided_polls}}</span></td>
                       <td><span class="badge bg-red-active">{{event.get_negative_polls}}</span></td>
                     {% else %}
+                      <th>NOT A POLLED EVENT</th>
                       <th>NOT A POLLED EVENT</th>
                       <th>NOT A POLLED EVENT</th>
                       <th>NOT A POLLED EVENT</th>
@@ -85,6 +88,7 @@
                   <th>Date Created</th>
                   <th>Total Event Polls</th>
                   <th>Positive Attendees</th>
+                  <th>Undecided Attendees (Maybe)</th>
                   <th>Declined Attendees</th>
                 </tr>
                 </tfoot>
